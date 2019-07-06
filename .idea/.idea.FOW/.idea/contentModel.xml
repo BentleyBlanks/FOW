@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="C:\Users\Bentl\.Rider2019.1\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Bentl\.Rider2019.1\system\resharper-host\local\Transient\ReSharperHost\v191\SolutionCaches\_FOW.2121804468.00" t="ExcludeRecursive" />
+    <e p="E:\Program\Unity\FOW" t="IncludeRecursive">
+      <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
+      <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
+      <e p="Assets" t="Include">
+        <e p="FOW" t="Include">
+          <e p="Scripts" t="Include">
+            <e p="Editor" t="Include">
+              <e p="FOWEffectEditor.cs" t="Include" />
+            </e>
+            <e p="FOWData.cs" t="Include" />
+            <e p="FOWEffect.cs" t="Include" />
+            <e p="FOWMap.cs" t="Include" />
+            <e p="FOWMapData.cs" t="Include" />
+            <e p="FOWMaskData.cs" t="Include" />
+            <e p="FOWPlayer.cs" t="Include" />
+            <e p="FOWRenderer.cs" t="Include" />
+            <e p="FOWShadow.cs" t="Include" />
+            <e p="FOWShadowDota.cs" t="Include" />
+            <e p="FOWShadowSDF.cs" t="Include" />
+          </e>
+          <e p="Shaders" t="Include">
+            <e p="FOWBlur.shader" t="Include" />
+            <e p="FOWBlurSDF.shader" t="Include" />
+            <e p="FOWEffect.shader" t="Include" />
+            <e p="FOWJumpFloodSDF.shader" t="Include" />
+            <e p="FOWShadowSDF.shader" t="Include" />
+          </e>
+        </e>
+      </e>
+      <e p="FOW.sln" t="IncludeFlat" />
+      <e p="obj" t="ExcludeRecursive" />
+      <e p="Packages" t="ExcludeRecursive" />
+      <e p="Temp\bin" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>

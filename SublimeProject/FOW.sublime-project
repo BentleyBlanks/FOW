@@ -1,0 +1,14 @@
+{
+    "folders":
+    [ 
+        {
+            "follow_symlinks": true,
+            "path": "E:\\Program\\Unity\\FOW\\Assets\\",
+            "file_exclude_patterns":
+            [
+                "*.dll",
+                "*.meta"
+            ]
+        }
+    ]
+}

@@ -34,6 +34,8 @@ public class FOWEffect : MonoBehaviour
     public float m_Luminance    = 3.5f;
     public float m_StepScale    = 0.9f;
     public float m_StepMinValue = 0.0001f;
+    
+    public int m_Test = 4;
 
     public Color m_FogColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
     public int m_ColliderLayerMask = 0;
@@ -212,6 +214,7 @@ public class FOWEffect : MonoBehaviour
             shadowSDF.m_Luminance           = m_Luminance;
             shadowSDF.m_StepScale           = m_StepScale;
             shadowSDF.m_StepMinValue        = m_StepMinValue;
+            shadowSDF.m_Test                = m_Test;
             break;
         }
 

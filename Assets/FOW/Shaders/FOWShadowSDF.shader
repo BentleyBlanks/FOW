@@ -157,6 +157,7 @@
 			    float minLightDistance = _SDFTexture.Sample(_FOW_Trilinear_Clamp_Sampler, uv).r;
 			    // float4 value = _SDFTexture.Sample(_FOW_Trilinear_Clamp_Sampler, uv);
 			    // return float4(length(uv - value.zw).xxx, 1.0f);
+			    // return float4(minLightDistance.xxx, 1.0f);
 
                 float4 lightColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
 				setLuminance(lightColor, _Luminance);

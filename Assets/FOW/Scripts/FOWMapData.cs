@@ -178,9 +178,9 @@ namespace MoleMole
             if (m_MapDataTexture == null)
             {
                 m_MapDataTexture            = null;
-                m_MapDataTexture            = new Texture2D(texWidth, texHeight, TextureFormat.RGB24, false);
+                m_MapDataTexture            = new Texture2D(texWidth, texHeight, TextureFormat.ARGB32, true);
                 m_MapDataTexture.wrapMode   = TextureWrapMode.Clamp;
-                m_MapDataTexture.filterMode = FilterMode.Point;
+                m_MapDataTexture.filterMode = FilterMode.Trilinear;
             }
 
             if (m_MapData == null || m_MapData.Length != length)

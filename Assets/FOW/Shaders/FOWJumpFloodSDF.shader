@@ -16,14 +16,14 @@
 	
 			struct vertInput
 			{
-				fixed4 vertex : POSITION;
-				fixed2 texCoord : TEXCOORD0;
+				float4 vertex : POSITION;
+				float2 texCoord : TEXCOORD0;
 			};
 
 			struct fragInput
 			{
-				fixed2 texCoord : TEXCOORD0;
-				fixed4 positionCS : SV_POSITION;
+				float2 texCoord : TEXCOORD0;
+				float4 positionCS : SV_POSITION;
 			};
 
 			fragInput vert(vertInput input)
@@ -36,7 +36,7 @@
 			    return output;
 			}
 
-			fixed4 frag (fragInput input) : SV_Target
+			float4 frag (fragInput input) : SV_Target
 			{
 				float2 uv = input.texCoord;
 				float4 value = _MapDataTexture.Sample(_SDFTexture_Trilinear_Clamp_Sampler, uv);
@@ -45,12 +45,12 @@
 				float2 coord = float2(0.0f, 0.0f);
 
 				// Seed
-				if(value.x >= 0.1f)
+				if(value.x >= 0.9f && value.y <= 0.1f)
 				{
 					color = float2(1.0f, 0.0f);
 					coord = uv;
 				}
-				return fixed4(color, coord);
+				return float4(color, coord);
 			}
 
 			ENDCG
@@ -74,14 +74,14 @@
 
 			struct vertInput
 			{
-				fixed4 vertex : POSITION;
-				fixed2 texCoord : TEXCOORD0;
+				float4 vertex : POSITION;
+				float2 texCoord : TEXCOORD0;
 			};
 
 			struct fragInput
 			{
-				fixed2 texCoord : TEXCOORD0;
-				fixed4 positionCS : SV_POSITION;
+				float2 texCoord : TEXCOORD0;
+				float4 positionCS : SV_POSITION;
 			};
 
 			fragInput vert(vertInput input)
@@ -94,12 +94,13 @@
 			    return output;
 			}
 
-			fixed4 frag (fragInput input) : SV_Target
+			float4 frag (fragInput input) : SV_Target
 			{
 				float minDistance = 99999.0;
 				float2 minCoord = float2(0.0f, 0.0f);
 				float2 minColor = float2(0.0f, 1.0f);
-				float stepwidth = floor(exp2(_Power - _Level) + 0.5);
+				// float stepwidth = floor(exp2(_Power - _Level) + 0.5);
+				float stepwidth = _Power - _Level + 1;
 
 			    for (int y = -1; y <= 1; ++y) 
 			    {
@@ -111,7 +112,7 @@
 						float4 value     = _SDFTexture.Sample(_SDFTexture_Trilinear_Clamp_Sampler, uv);
 						float2 seedColor = value.xy;
 						float2 seedCoord = value.zw;
-						float distance = length(uv - seedCoord);
+						float distance = length(input.texCoord - seedCoord);
 						// only need RG
 						if ((seedCoord.x != 0.0 || seedCoord.y != 0.0) && distance < minDistance)
 			            {
@@ -122,7 +123,7 @@
         			}
     			}
 
-				return fixed4(minColor, minCoord);
+				return float4(minColor, minCoord);
 			}
 
 			ENDCG
@@ -146,14 +147,14 @@
 
 			struct vertInput
 			{
-				fixed4 vertex : POSITION;
-				fixed2 texCoord : TEXCOORD0;
+				float4 vertex : POSITION;
+				float2 texCoord : TEXCOORD0;
 			};
 
 			struct fragInput
 			{
-				fixed2 texCoord : TEXCOORD0;
-				fixed4 positionCS : SV_POSITION;
+				float2 texCoord : TEXCOORD0;
+				float4 positionCS : SV_POSITION;
 			};
 
 			fragInput vert(vertInput input)
@@ -166,14 +167,12 @@
 			    return output;
 			}
 
-			fixed4 frag (fragInput input) : SV_Target
+			float4 frag (fragInput input) : SV_Target
 			{
 				float2 uv = input.texCoord;
 				float4 value = _SDFFinalTexture.Sample(_Texture_Trilinear_Clamp_Sampler, uv);
-				float distance = length(uv - value.zw);
-				if(distance < 0.001f)
-					distance = 0.0f;
-				return fixed4(distance.xxx * 100, 1.0f);
+				float distance = min(length(uv - value.zw), 1.0f);
+				return float4(distance.xxx, 1.0f);
 			}
 
 			ENDCG

@@ -14,6 +14,8 @@ public class FOWShadowSDF : FOWShadow
 {
     public FOWSDFPregenerateMode m_PregenerateMode = FOWSDFPregenerateMode.GPU;
     public string m_TextureSavePath = "";
+
+    public int m_Test = 4;
     
     // Shading parameter
     public int   m_BlurInteration      = 2;
@@ -224,22 +226,24 @@ public class FOWShadowSDF : FOWShadow
 
         float power = Mathf.Log(texHeight, 2);
         Vector2 texelSize = new Vector2(1.0f / texWidth, 1.0f / texHeight);
-        
-        for (int i = 0; i <= power; i++) 
+
+        int levelCount = (int)power + m_Test;
+        for (int i = 0; i <= levelCount; i++)
         {
+            int level  = i > power ? (int) power : i;
             int index0 = i % 2;
             int index1 = (i + 1) % 2;
         
             m_SDFMaterial.SetTexture("_SDFTexture", pingpong[index0]);
             m_SDFMaterial.SetVector("_TexelSize", texelSize);
-            m_SDFMaterial.SetFloat("_Level", i);
+            m_SDFMaterial.SetFloat("_Level", level);
             m_SDFMaterial.SetFloat("_Power", power);
             Graphics.Blit(null, pingpong[index1], m_SDFMaterial, 1);
         }
 
         // Final gathering
         RenderTexture result = null;
-        if ((int) power % 2 == 1) 
+        if (levelCount % 2 == 1) 
             result = pingpong[0];
         else
             result = pingpong[1];

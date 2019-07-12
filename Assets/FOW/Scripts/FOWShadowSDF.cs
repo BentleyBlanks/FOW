@@ -345,7 +345,14 @@ public class FOWShadowSDF : FOWShadow
     {
         if (m_TextureSavePath != "")
         {
+            System.IO.File.WriteAllBytes(m_TextureSavePath, m_MapData.mapDataTexture.EncodeToPNG());
             System.IO.File.WriteAllBytes(m_TextureSavePath, m_SDFTexture.EncodeToPNG());
+            
+            Texture2D fowTexture = new Texture2D(texWidth, texHeight, TextureFormat.ARGB32, false);
+            RenderTexture.active = m_Fowtexture;
+            fowTexture.ReadPixels(new Rect(0, 0, m_Fowtexture.width, m_Fowtexture.height), 0, 0);
+            fowTexture.Apply();
+            System.IO.File.WriteAllBytes(m_TextureSavePath, fowTexture.EncodeToPNG());
             return true;
         }
 

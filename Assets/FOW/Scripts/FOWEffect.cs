@@ -16,9 +16,9 @@ public class FOWEffect : MonoBehaviour
     // MapData and MaskData share the same FOWData
     public FOWData m_Data = new FOWData();
 
-    public FOWShadowType         m_FOWShadowType = FOWShadowType.FOWSHADOW_TYPE_SDF;
+    public FOWShadowType         m_FOWShadowType = FOWShadowType.FOWSHADOW_TYPE_DOTA;
     public FOWShadow             m_FOWShadow;
-    public FOWSDFPregenerateMode m_PregenerateMode = FOWSDFPregenerateMode.GPU;
+    public FOWSDFPregenerateMode m_PregenerateMode = FOWSDFPregenerateMode.CPU;
 
     [Header("-----------------------Shading-----------------------")]
     public int m_BlurInteration = 0;
@@ -73,13 +73,15 @@ public class FOWEffect : MonoBehaviour
     private RenderTexture m_CopyCameraBuffer = null;
     private bool m_IsInited = false;
     private static FOWEffect m_Instance;
-
+    
+    // Waiting the scene's objects ready
+    private bool m_FirstUpdate = true;
     #endregion
-
-    public void Awake()
+    
+    public void OnEnable()
     {
-        Init();
-        GenerateMapData();
+        Init();            
+        GenerateFOWTexture();
     }
 
     public void OnDestroy()
@@ -95,6 +97,11 @@ public class FOWEffect : MonoBehaviour
 
     public void Update()
     {
+        if (m_FirstUpdate)
+        {
+            m_FirstUpdate = false;
+        }
+        
         m_Data.Update();
         if(m_FOWShadow != null)
             m_FOWShadow.Update();
@@ -143,13 +150,13 @@ public class FOWEffect : MonoBehaviour
         m_IsInited = true;
     }
 
-    public void GenerateMapData()
+    public void GenerateFOWTexture()
     {
         if (!IsInited()) return;
         m_FOWShadow.Pregenerate();
     }
 
-    public void SaveMapData()
+    public void SaveFOWTexture()
     {
         if (!IsInited()) return;
         m_FOWShadow.SaveFOWTexture();

@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"mi",
+				"minLightDistance\tabc"
+			],
+			[
+				"fl",
+				"float4\tabc"
+			],
+			[
+				"fixed",
+				"fixed4\tabc"
+			],
+			[
 				"_Camer",
 				"_CameraToWaterHeight"
 			],
@@ -412,10 +424,6 @@
 				"gBuffer0"
 			],
 			[
-				"fl",
-				"float3"
-			],
-			[
 				"Base",
 				"BaseColorBuffer"
 			],
@@ -506,19 +514,59 @@
 			[
 				"norm",
 				"normal\t(ShaderPacker.shader)"
-			],
-			[
-				"norml",
-				"normalize\t(OctahedronImpostor.shader)"
-			],
-			[
-				"samplerNormal",
-				"sampler_NormalTexture"
 			]
 		]
 	},
 	"buffers":
 	[
+		{
+			"contents": "Shader \"Hidden/FOWEffect\"\n{\n\tProperties {}\n\t\n\tSubShader\n\t{\n\t\tCull Off \n\t\tZWrite Off \n\t\tZTest Always\n\n\t\tPass\n\t\t{\n\t\t\tCGPROGRAM\n\t\t\t#pragma vertex vert\n\t\t\t#pragma fragment frag\n\t\t\t\n\t\t\t#pragma shader_feature FOWSHADOWTYPE_SDF\n\n\t\t\t#include \"UnityCG.cginc\"\n\n\t\t\tstruct vertInput\n\t\t\t{\n\t\t\t\tfixed4 vertex : POSITION;\n\t\t\t\tfixed2 texCoord : TEXCOORD0;\n\t\t\t};\n\n\t\t\tstruct fragInput\n\t\t\t{\n\t\t\t\tfixed2 texCoord : TEXCOORD0;\n\t\t\t\tfixed4 positionCS : SV_POSITION;\n\t\t\t};\n\n\t\t\t// sampler2D _CameraColorBuffer;\n\t\t\t// sampler2D _CustomDepthTexture;\n\t\t\t// sampler2D _FOWTexture;\n\t\t\t\n\t\t\tTexture2D _CameraDepthTexture;\n\t\t\tTexture2D _CameraColorBuffer;\n\t\t\tTexture2D _FOWTexture;\n\t\t\tSamplerState _FOW_Trilinear_Clamp_Sampler;\n\n\t\t\tfixed _FogValue;\n\t\t\tfixed2 _InvSize;\n\t\t\tfixed4 _PositionWS;\n\t\t\tfloat4x4 _InvVP;\n\t\t\tfloat4x4 _FOWWorldToLocal;\n\n\t\t\t// shading\n\t\t\thalf _LerpValue;\n\t\t\thalf4 _FogColor;\n\t\t\t\n\t\t\tfragInput vert (vertInput input)\n\t\t\t{\n\t\t\t    fragInput output;\n\t\t\t        \n\t\t\t    output.positionCS = UnityObjectToClipPos(input.vertex);\n                output.texCoord = input.texCoord;\n                \n\t\t\t    return output;\n\t\t\t}\n\n           fixed3 ComputeWorldSpacePosition(fixed2 positionNDC, fixed deviceDepth)\n           {\n               fixed4 positionCS = fixed4(fixed3(positionNDC, deviceDepth) * 2.0f - 1.0f, 1.0f);\n               fixed4 positionVS = mul(_InvVP, positionCS);\n\n               fixed3 positionWS = positionVS.xyz / positionVS.w;\n               return positionWS;\n           }\n\n\t\t\tfixed4 frag (fragInput input) : SV_Target\n\t\t\t{\n\t\t\t\t// fixed depth = SAMPLE_DEPTH_TEXTURE(_CustomDepthTexture, input.texCoord);\n\t\t\t\tfixed depth = _CameraDepthTexture.Sample(_FOW_Trilinear_Clamp_Sampler, input.texCoord);\n\t\t\t    \n\t\t\t#if defined(UNITY_REVERSED_Z)\n\t\t\t\tdepth = 1.0f - depth;\n\t\t\t#endif\n\t\t\t\t// return fixed4(depth.xxx, 1.0f);\n\n\t\t\t\t// recreate world space position \n\t\t\t    fixed3 positionWS = ComputeWorldSpacePosition(input.texCoord, depth);\n\t\t\t    fixed4 positionLS = mul(_FOWWorldToLocal, fixed4(positionWS, 1.0f));\n\t\t\t    positionLS /= positionLS.w;\n\n\t\t\t    // sample texture in mask's local space \n\t\t\t    // fixed3 fogValue = tex2D(_FOWTexture, positionLS.xz * fixed2(_InvSize));\n\t\t\t    // fixed3 bgColor  = tex2D(_CameraColorBuffer, input.texCoord);\n\t\t\t    fixed3 fogValue = _FOWTexture.Sample(_FOW_Trilinear_Clamp_Sampler, positionLS.xz * fixed2(_InvSize));\n\t\t\t    fixed3 bgColor  = _CameraColorBuffer.Sample(_FOW_Trilinear_Clamp_Sampler, input.texCoord);\n\n\t\t\t    fixed3 color;\n\t    \t#ifdef FOWSHADOWTYPE_SDF\n\t\t    \tcolor = bgColor * max(fogValue.r, _FogValue);\n\t\t    #else\n\t\t\t\tcolor = lerp(_FogColor.rgb, fixed3(1, 1, 1), fogValue.r * _FogColor.a);\n\n\t\t\t    // Mixed between last and current frame fog texture\n\t\t\t\tfixed visual = lerp(fogValue.b, fogValue.g, _LerpValue);\n\t\t\t\tcolor = lerp(color, fixed3(1, 1, 1), visual);\n\t\t\t\tcolor *= bgColor;\n\t\t    #endif\n\t\t\t    return fixed4(color, 1.0f);\n\t\t\t}\n\t\t\tENDCG\n\t\t}\n\t}\n}\n",
+			"file": "/E/Program/Unity/FOW/Assets/FOW/Shaders/FOWEffect.shader",
+			"file_size": 3013,
+			"file_write_time": 132069095700412882,
+			"settings":
+			{
+				"buffer_size": 2902,
+				"line_ending": "Windows",
+				"scratch": true
+			}
+		},
+		{
+			"file": "/E/Program/Unity/FOW/Assets/FOW/Shaders/FOWShadowSDF.shader",
+			"settings":
+			{
+				"buffer_size": 4518,
+				"encoding": "UTF-8 with BOM",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Program/Unity/Water/Assets/Scenes/Water.shader",
+			"settings":
+			{
+				"buffer_size": 1069,
+				"encoding": "UTF-8 with BOM",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/OneDrive - FreeShadow/Sync/BH3/Water.shader",
+			"settings":
+			{
+				"buffer_size": 15037,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/E/Program/Unity/FOW/Assets/FOW/Shaders/FOWJumpFloodSDF.shader",
+			"settings":
+			{
+				"buffer_size": 3984,
+				"encoding": "UTF-8 with BOM",
+				"line_ending": "Windows"
+			}
+		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -582,12 +630,12 @@
 	[
 		"/E/Program/Unity/FOW/Assets",
 		"/E/Program/Unity/FOW/Assets/FOW",
-		"/E/Program/Unity/FOW/Assets/FOW/Shaders",
 		"/E/Program/Unity/FOW/Assets/Plugins",
 		"/E/Program/Unity/FOW/Assets/Scenes"
 	],
 	"file_history":
 	[
+		"/E/OneDrive - FreeShadow/Sync/BH3/Water.shader",
 		"/E/Program/Unity/FOW/.gitignore",
 		"/C/Users/Bentl/Documents/Program/fakeUnityShader/fake_unity_shader/shader_parser/shader_generator.lua",
 		"/C/Users/Bentl/Documents/Program/Sophia/Sophia/shaders/perlinWorleyNoise.shader",
@@ -714,12 +762,11 @@
 		"/D/Program/Unity/ProjectX/Assets/SRP/ScriptableRenderPipeline/HDRenderPipeline/HDRP/Material/Lit/LitTessellation.shader",
 		"/D/Program/Unity/ProjectX/Assets/SpaceCore/Experimental/Water/Shader/WaterVertMesh.hlsl",
 		"/D/Program/Unity/ProjectX/Assets/SpaceCore/Experimental/Water/Shader/Water.hlsl",
-		"/D/Program/Unity/ProjectX/Assets/SpaceCore/Experimental/Water/Shader/Water.shader",
-		"/D/Program/Unity/ProjectX/Assets/SpaceCore/Experimental/Water/Shader/WaterShading.hlsl"
+		"/D/Program/Unity/ProjectX/Assets/SpaceCore/Experimental/Water/Shader/Water.shader"
 	],
 	"find":
 	{
-		"height": 28.0
+		"height": 40.0
 	},
 	"find_in_files":
 	{
@@ -730,9 +777,17 @@
 	},
 	"find_state":
 	{
-		"case_sensitive": false,
+		"case_sensitive": true,
 		"find_history":
 		[
+			"fixed4",
+			"i",
+			"v2f",
+			"appdata",
+			"uv",
+			"Trilinear",
+			"fixed2",
+			"fixed4"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -744,20 +799,173 @@
 		"reverse": false,
 		"show_context": true,
 		"use_buffer2": true,
-		"whole_word": false,
+		"whole_word": true,
 		"wrap": true
 	},
 	"groups":
 	[
 		{
+			"selected": 2,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "/E/Program/Unity/FOW/Assets/FOW/Shaders/FOWEffect.shader",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2902,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1808,
+								1808
+							]
+						],
+						"settings":
+						{
+							"in_converting": true,
+							"is_init_dirty_state": false,
+							"origin_content": "Shader \"Hidden/FOWEffect\"\n{\n\tProperties {}\n\t\n\tSubShader\n\t{\n\t\tCull Off \n\t\tZWrite Off \n\t\tZTest Always\n\n\t\tPass\n\t\t{\n\t\t\tCGPROGRAM\n\t\t\t#pragma vertex vert\n\t\t\t#pragma fragment frag\n\t\t\t\n\t\t\t#pragma shader_feature FOWSHADOWTYPE_SDF\n\n\t\t\t#include \"UnityCG.cginc\"\n\n\t\t\tstruct vertInput\n\t\t\t{\n\t\t\t\tfixed4 vertex : POSITION;\n\t\t\t\tfixed2 texCoord : TEXCOORD0;\n\t\t\t};\n\n\t\t\tstruct fragInput\n\t\t\t{\n\t\t\t\tfixed2 texCoord : TEXCOORD0;\n\t\t\t\tfixed4 positionCS : SV_POSITION;\n\t\t\t};\n\n\t\t\t// sampler2D _CameraColorBuffer;\n\t\t\t// sampler2D _CustomDepthTexture;\n\t\t\t// sampler2D _FOWTexture;\n\t\t\t\n\t\t\tTexture2D _CameraDepthTexture;\n\t\t\tTexture2D _CameraColorBuffer;\n\t\t\tTexture2D _FOWTexture;\n\t\t\tSamplerState _FOW_Trilinear_Clamp_Sampler;\n\n\t\t\tfixed _FogValue;\n\t\t\tfixed2 _InvSize;\n\t\t\tfixed4 _PositionWS;\n\t\t\tfloat4x4 _InvVP;\n\t\t\tfloat4x4 _FOWWorldToLocal;\n\n\t\t\t// shading\n\t\t\thalf _LerpValue;\n\t\t\thalf4 _FogColor;\n\t\t\t\n\t\t\tfragInput vert (vertInput input)\n\t\t\t{\n\t\t\t    fragInput output;\n\t\t\t        \n\t\t\t    output.positionCS = UnityObjectToClipPos(input.vertex);\n                output.texCoord = input.texCoord;\n                \n\t\t\t    return output;\n\t\t\t}\n\n           fixed3 ComputeWorldSpacePosition(fixed2 positionNDC, fixed deviceDepth)\n           {\n               fixed4 positionCS = fixed4(fixed3(positionNDC, deviceDepth) * 2.0f - 1.0f, 1.0f);\n               fixed4 positionVS = mul(_InvVP, positionCS);\n\n               fixed3 positionWS = positionVS.xyz / positionVS.w;\n               return positionWS;\n           }\n\n\t\t\tfixed4 frag (fragInput input) : SV_Target\n\t\t\t{\n\t\t\t\t// fixed depth = SAMPLE_DEPTH_TEXTURE(_CustomDepthTexture, input.texCoord);\n\t\t\t\tfixed depth = _CameraDepthTexture.Sample(_FOW_Trilinear_Clamp_Sampler, input.texCoord);\n\t\t\t    \n\t\t\t#if defined(UNITY_REVERSED_Z)\n\t\t\t\tdepth = 1.0f - depth;\n\t\t\t#endif\n\t\t\t\t// return fixed4(depth.xxx, 1.0f);\n\n\t\t\t\t// recreate world space position \n\t\t\t    fixed3 positionWS = ComputeWorldSpacePosition(input.texCoord, depth);\n\t\t\t    fixed4 positionLS = mul(_FOWWorldToLocal, fixed4(positionWS, 1.0f));\n\t\t\t    positionLS /= positionLS.w;\n\n\t\t\t    // sample texture in mask's local space \n\t\t\t    // fixed3 fogValue = tex2D(_FOWTexture, positionLS.xz * fixed2(_InvSize));\n\t\t\t    // fixed3 bgColor  = tex2D(_CameraColorBuffer, input.texCoord);\n\t\t\t    fixed3 fogValue = _FOWTexture.Sample(_FOW_Trilinear_Clamp_Sampler, positionLS.xz * fixed2(_InvSize));\n\t\t\t    fixed3 bgColor  = _CameraColorBuffer.Sample(_FOW_Trilinear_Clamp_Sampler, input.texCoord);\n\n\t\t\t    fixed3 color;\n\t    \t#ifdef FOWSHADOWTYPE_SDF\n\t\t    \tcolor = bgColor * max(fogValue.r, _FogValue);\n\t\t    #else\n\t\t\t\tcolor = lerp(_FogColor.rgb, fixed3(1, 1, 1), fogValue.r * _FogColor.a);\n\n\t\t\t    // Mixed between last and current frame fog texture\n\t\t\t\tfixed visual = lerp(fogValue.b, fogValue.g, _LerpValue);\n\t\t\t\tcolor = lerp(color, fixed3(1, 1, 1), visual);\n\t\t\t\tcolor *= bgColor;\n\t\t    #endif\n\t\t\t    return fixed4(color, 1.0f);\n\t\t\t}\n\t\t\tENDCG\n\t\t}\n\t}\n}\n",
+							"origin_encoding": "UTF-8-SIG",
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1365.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/E/Program/Unity/FOW/Assets/FOW/Shaders/FOWShadowSDF.shader",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4518,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4089,
+								4089
+							]
+						],
+						"settings":
+						{
+							"is_init_dirty_state": false,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2434.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/E/Program/Unity/Water/Assets/Scenes/Water.shader",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1069,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								55,
+								55
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 57.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/E/OneDrive - FreeShadow/Sync/BH3/Water.shader",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 15037,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								138,
+								138
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 85.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/E/Program/Unity/FOW/Assets/FOW/Shaders/FOWJumpFloodSDF.shader",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3984,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3897,
+								3897
+							]
+						],
+						"settings":
+						{
+							"is_init_dirty_state": false,
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2964.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				}
 			]
 		}
 	],
 	"incremental_find":
 	{
-		"height": 28.0
+		"height": 31.0
 	},
 	"input":
 	{
@@ -810,7 +1018,7 @@
 	"project": "FOW.sublime-project",
 	"replace":
 	{
-		"height": 52.0
+		"height": 58.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -1360,8 +1568,8 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 234.0,
-	"status_bar_visible": false,
+	"side_bar_width": 199.0,
+	"status_bar_visible": true,
 	"template_settings":
 	{
 	}

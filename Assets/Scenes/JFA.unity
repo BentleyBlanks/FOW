@@ -396,7 +396,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29e2ca69ada85804ca75a227cf2e48db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Radius: 0.59
+  m_Radius: 3
 --- !u!135 &601695663
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -837,7 +837,7 @@ Transform:
   - {fileID: 76540702}
   - {fileID: 644355123}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1542454955
 GameObject:
@@ -1222,13 +1222,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2108227581}
-  m_LocalRotation: {x: -0.11896187, y: -0.70006996, z: 0.12003084, w: -0.6937887}
-  m_LocalPosition: {x: -8.071392, y: 3.6728985, z: 0.11781366}
+  m_LocalRotation: {x: 0, y: 0.9063079, z: -0.42261827, w: 0}
+  m_LocalPosition: {x: 0.087598056, y: 4.762209, z: 5.6388674}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 50, y: 180, z: 0}
 --- !u!114 &2108227585
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1242,15 +1242,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Data:
-    m_HeightRange: 2
+    m_HeightRange: 1.5
     m_XSize: 10
     m_ZSize: 10
     m_TexWidth: 256
     m_TexHeight: 256
-    m_PositionWS: {x: -5, y: 3, z: -5}
+    m_PositionWS: {x: -5, y: 2, z: -5}
     m_RotationWS: {x: 0, y: 0, z: 0}
-  m_FOWShadowType: 1
-  m_PregenerateMode: 1
+  m_FOWShadowType: 0
+  m_PregenerateMode: 0
   m_BlurInteration: 0
   m_BlurOffset: 0.05
   m_BlurLevel: 3.5
@@ -1261,7 +1261,7 @@ MonoBehaviour:
   m_Luminance: 3.5
   m_StepScale: 0.9
   m_StepMinValue: 0.0001
-  m_Test: 100
+  m_Test: 4
   m_FogColor: {r: 0.1, g: 0.1, b: 0.1, a: 0.5}
   m_ColliderLayerMask: 0
   m_VisualizeGrid: 1

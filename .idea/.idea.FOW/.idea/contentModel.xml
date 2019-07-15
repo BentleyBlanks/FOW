@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Users\Bentl\.Rider2019.1\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\Bentl\.Rider2019.1\system\resharper-host\local\Transient\ReSharperHost\v191\SolutionCaches\_FOW.2121804468.00" t="ExcludeRecursive" />
-    <e p="E:\Program\Unity\FOW" t="IncludeRecursive">
+    <e p="C:\Users\binbin.guan\.Rider2019.1\config\extensions" t="IncludeRecursive" />
+    <e p="C:\Users\binbin.guan\.Rider2019.1\system\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\binbin.guan\.Rider2019.1\system\resharper-host\local\Transient\ReSharperHost\v191\SolutionCaches\_FOW.-1918426283.00" t="ExcludeRecursive" />
+    <e p="D:\Program\Unity\FOW" t="IncludeRecursive">
       <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">

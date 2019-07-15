@@ -45,6 +45,8 @@ public class FOWEffectEditor : Editor
                     shadowSDF.Pregenerate();
                     shadowSDF.m_TextureSavePath = backup;
                 }
+
+                shadowSDF.m_TextureSavePath = GUILayout.TextArea(shadowSDF.m_TextureSavePath);
                 
                 if (GUILayout.Button("Save Textures"))
                 {
@@ -62,7 +64,7 @@ public class FOWEffectEditor : Editor
 
                 if (shadowDota.mapDataTexture != null)
                     GUILayout.Box(shadowDota.mapDataTexture);
-            
+
                 // regenerate texture infomation
                 if (GUILayout.Button("Generate"))
                     shadowDota.Pregenerate();

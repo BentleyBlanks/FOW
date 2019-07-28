@@ -15,8 +15,6 @@ public class FOWShadowSDF : FOWShadow
     public FOWSDFPregenerateMode m_PregenerateMode = FOWSDFPregenerateMode.GPU;
     public string m_TextureSavePath = "";
 
-    public int m_Test = 4;
-    
     // Shading parameter
     public int   m_BlurInteration      = 2;
     public float m_BlurLevel           = 3.5f;
@@ -154,10 +152,11 @@ public class FOWShadowSDF : FOWShadow
         }
         
         if(m_SDFTexture != null)
-            Object.Destroy(m_SDFTexture);
+            Object.DestroyImmediate(m_SDFTexture);
     }
 
     public void Update() { }
+    public void FixedUpdate() { }
 
     public void UpdatePlayerData(List<FOWPlayerData> playerDataList)
     {
@@ -227,7 +226,7 @@ public class FOWShadowSDF : FOWShadow
         float power = Mathf.Log(texHeight, 2);
         Vector2 texelSize = new Vector2(1.0f / texWidth, 1.0f / texHeight);
 
-        int levelCount = (int)power + m_Test;
+        int levelCount = (int)power;
         for (int i = 0; i <= levelCount; i++)
         {
             int level  = i > power ? (int) power : i;
@@ -345,13 +344,25 @@ public class FOWShadowSDF : FOWShadow
     {
         if (m_TextureSavePath != "")
         {
+            System.IO.File.WriteAllBytes(m_TextureSavePath, m_MapData.mapDataTexture.EncodeToPNG());
             System.IO.File.WriteAllBytes(m_TextureSavePath, m_SDFTexture.EncodeToPNG());
+            
+            Texture2D fowTexture = new Texture2D(texWidth, texHeight, TextureFormat.ARGB32, false);
+            RenderTexture.active = m_Fowtexture;
+            fowTexture.ReadPixels(new Rect(0, 0, m_Fowtexture.width, m_Fowtexture.height), 0, 0);
+            fowTexture.Apply();
+            System.IO.File.WriteAllBytes(m_TextureSavePath, fowTexture.EncodeToPNG());
             return true;
         }
 
         return false;
     }
 
+    public virtual FOWShadowType GetFowShadowType()
+    {
+        return FOWShadowType.FOWSHADOW_TYPE_SDF;
+    }
+    
     public RenderTexture RenderFOWTexture()
     {
         // SDF shading parameter update

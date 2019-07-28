@@ -9,10 +9,13 @@ public class FOWShadowDota : FOWShadow
 
     public float m_BlurOffset     = 0.05f;
     public int   m_BlurInteration = 0;
+    public float m_BlurResolutionScale = 0.8f;
 
     private Material m_BlurMaterial = null;
     private RenderTexture m_Fowtexture = null;
-    
+    private FOWData m_FOWData = null;
+    private Vector2 m_TextureTexelSize = Vector2.one;
+
     public Texture2D mapDataTexture
     {
         get
@@ -37,6 +40,24 @@ public class FOWShadowDota : FOWShadow
         }
     }
     
+    public int texWidth
+    {
+        get
+        {
+            if (m_FOWData != null) return m_FOWData.m_TexWidth;
+            return 0;
+        }
+    }
+
+    public int texHeight
+    {
+        get
+        {
+            if (m_FOWData != null) return m_FOWData.m_TexHeight;
+            return 0;
+        }
+    }
+    
     public RenderTexture fowTexture
     {
         get
@@ -50,11 +71,22 @@ public class FOWShadowDota : FOWShadow
         Init(data);
     }
     
-    public void Init(FOWData data)
+    public void Init(FOWData data = null)
     {
-        if (m_Fowtexture == null)
+        if(data != null)
+            m_FOWData = data;
+        
+        if (m_Fowtexture == null ||
+            m_Fowtexture.width != texWidth ||
+            m_Fowtexture.height != texHeight)
         {
-            m_Fowtexture = new RenderTexture(data.m_TexWidth, data.m_TexHeight, 0, RenderTextureFormat.ARGB32);
+            if (m_Fowtexture != null)
+            {
+                Object.DestroyImmediate(m_Fowtexture);
+                m_Fowtexture = null;
+            }
+            
+            m_Fowtexture = new RenderTexture(texWidth, texHeight, 0, RenderTextureFormat.ARGB32);
             m_Fowtexture.wrapMode   = TextureWrapMode.Clamp;
             m_Fowtexture.filterMode = FilterMode.Bilinear;
             m_Fowtexture.Create();
@@ -66,6 +98,8 @@ public class FOWShadowDota : FOWShadow
         // Generate map data
         if (m_Map == null)
             m_Map = new FOWMap(data);
+        
+        m_TextureTexelSize = new Vector2(1.0f / texWidth, 1.0f / texHeight);
     }
 
     public void Destroy()
@@ -85,9 +119,16 @@ public class FOWShadowDota : FOWShadow
 
     public void Update()
     {
+        Init();
+        
         m_Map.Update();
     }
 
+    public void FixedUpdate()
+    {
+        m_Map.FixedUpdate();
+    }
+    
     public void UpdatePlayerData(List<FOWPlayerData> playerDataList)
     {
         m_Map.UpdateMask(playerDataList);
@@ -109,9 +150,12 @@ public class FOWShadowDota : FOWShadow
         Graphics.Blit(maskTexture, rt);
         
         m_BlurMaterial.SetFloat("_Offset", m_BlurOffset);
+        m_BlurMaterial.SetVector("_TextureTexelSize", m_TextureTexelSize);
         for (int i = 0; i <= m_BlurInteration; i++)
         {
-            var rt2 = RenderTexture.GetTemporary(maskTexture.width / 2, maskTexture.height / 2, 0);
+            int width  = (int) (m_BlurResolutionScale * rt.width);
+            int height = (int) (m_BlurResolutionScale * rt.height);
+            var rt2 = RenderTexture.GetTemporary(width, height, 0);
             m_BlurMaterial.SetTexture("_FOWTexture", rt);
             Graphics.Blit(null, rt2, m_BlurMaterial);
             
@@ -128,5 +172,10 @@ public class FOWShadowDota : FOWShadow
     public float GetLerpValue()
     {
         return m_Map.m_MaskData.mixValue;
+    }
+    
+    public virtual FOWShadowType GetFowShadowType()
+    {
+        return FOWShadowType.FOWSHADOW_TYPE_DOTA;
     }
 }

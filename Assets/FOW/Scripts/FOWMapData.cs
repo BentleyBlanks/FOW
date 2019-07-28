@@ -159,41 +159,46 @@ namespace MoleMole
 
         private FOWData m_FOWData = null;
         
-        public void Init(FOWData data)
+        public void Init(FOWData data = null)
         {
-            m_FOWData = data;
+            if(data != null)
+                m_FOWData = data;
 
             int length = texWidth * texHeight;
             
             // regenerate when attributes changed
             if (m_MapDataColorBuffer == null || m_MapDataColorBuffer.Length != length)
-            {
-                m_MapDataColorBuffer = null;
                 m_MapDataColorBuffer = new Color[texWidth * texHeight];
-            }
 
             if (m_MapDataObstacleBuffer == null) 
                 m_MapDataObstacleBuffer = new List<Vector2>();
 
-            if (m_MapDataTexture == null)
+            if (m_MapDataTexture == null || 
+                m_MapDataTexture.width != texWidth || 
+                m_MapDataTexture.height != texHeight)
             {
-                m_MapDataTexture            = null;
-                m_MapDataTexture            = new Texture2D(texWidth, texHeight, TextureFormat.ARGB32, true);
+                if (m_MapDataTexture != null)
+                {
+                    Object.DestroyImmediate(m_MapDataTexture);
+                    m_MapDataTexture = null;
+                }
+                
+                m_MapDataTexture            = new Texture2D(texWidth, texHeight, TextureFormat.ARGB32, false);
                 m_MapDataTexture.wrapMode   = TextureWrapMode.Clamp;
-                m_MapDataTexture.filterMode = FilterMode.Trilinear;
+                m_MapDataTexture.filterMode = FilterMode.Bilinear;
             }
 
             if (m_MapData == null || m_MapData.Length != length)
-            {
-                m_MapData = null;
                 m_MapData = new bool[texWidth, texHeight];
-            }
         }
         
         public void DeInit()
         {
-            Object.DestroyImmediate(m_MapDataTexture);
-            m_MapDataTexture        = null;
+            if (m_MapDataTexture != null)
+            {
+                Object.DestroyImmediate(m_MapDataTexture);
+                m_MapDataTexture = null;
+            }
             m_MapData               = null;
             m_MapDataColorBuffer    = null;
             m_MapDataObstacleBuffer = null;
@@ -202,6 +207,7 @@ namespace MoleMole
         
         public void Update()
         {
+            Init();
         }
         
         private bool IsObstacle(int x, int y)

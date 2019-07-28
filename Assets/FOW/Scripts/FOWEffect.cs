@@ -21,24 +21,21 @@ public class FOWEffect : MonoBehaviour
     public FOWSDFPregenerateMode m_PregenerateMode = FOWSDFPregenerateMode.CPU;
 
     [Header("-----------------------Shading-----------------------")]
-    public int m_BlurInteration = 0;
-    public float m_BlurOffset          = 0.05f;
-    public float m_BlurLevel           = 3.5f;
-    public float m_BlurResolutionScale = 0.8f;
+    [Range(0, 10)] public int m_BlurInteration = 0;
+    [Range(0.01f, 5.0f)]  public float m_BlurOffset          = 0.05f;
+    [Range(0.01f, 10.0f)] public float m_BlurLevel           = 3.5f;
+    [Range(0.01f, 1.0f)]  public float m_BlurResolutionScale = 0.8f;
     
     [Range(0.0f, 1.0f)] public float m_FogValue = 0.4f;
 
     [HideInInspector] public string m_TextureSavePath = "";
 
-    public float m_CutOff       = 0.0001f;
-    public float m_Luminance    = 3.5f;
-    public float m_StepScale    = 0.9f;
-    public float m_StepMinValue = 0.0001f;
+    [Range(0.00001f, 0.2f)] public float m_CutOff       = 0.0001f;
+    [Range(0.01f, 10.0f)]   public float m_Luminance    = 3.5f;
+    [Range(0.01f, 1.0f)]    public float m_StepScale    = 0.9f;
+    [Range(0.01f, 0.3f)]    public float m_StepMinValue = 0.0001f;
     
-    public int m_Test = 4;
-
     public Color m_FogColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
-    public int m_ColliderLayerMask = 0;
 
     public static FOWEffect instance
     {
@@ -73,15 +70,11 @@ public class FOWEffect : MonoBehaviour
     private RenderTexture m_CopyCameraBuffer = null;
     private bool m_IsInited = false;
     private static FOWEffect m_Instance;
-    
-    // Waiting the scene's objects ready
-    private bool m_FirstUpdate = true;
     #endregion
     
     public void OnEnable()
     {
-        Init();            
-        GenerateFOWTexture();
+        Init();
     }
 
     public void OnDestroy()
@@ -97,18 +90,24 @@ public class FOWEffect : MonoBehaviour
 
     public void Update()
     {
-        if (m_FirstUpdate)
-        {
-            m_FirstUpdate = false;
-        }
-        
+        Init();
+    }
+
+    public void FixedUpdate()
+    {        
         m_Data.Update();
-        if(m_FOWShadow != null)
-            m_FOWShadow.Update();
+        m_FOWShadow.Update();
+        m_FOWShadow.FixedUpdate();
     }
 
     public void Init()
     {
+        if (m_FOWShadowType == FOWShadowType.FOWSHADOW_TYPE_DOTA)
+        {
+            m_PregenerateMode = FOWSDFPregenerateMode.CPU;
+            Debug.Log("FOW Grid Mode GPU not supported");
+        }
+    
         // Camera need to write depth into depthTexture
         if (m_Camera == null)
         {
@@ -116,8 +115,11 @@ public class FOWEffect : MonoBehaviour
             m_Camera.depthTextureMode = DepthTextureMode.Depth;
         }
 
-        if (m_FOWShadow == null)
+        if (m_FOWShadow == null || m_FOWShadowType != m_FOWShadow.GetFowShadowType())
         {
+            if(m_FOWShadow != null)
+                m_FOWShadow.Destroy();
+            
             switch (m_FOWShadowType)
             {
             case FOWShadowType.FOWSHADOW_TYPE_DOTA:
@@ -125,7 +127,7 @@ public class FOWEffect : MonoBehaviour
                 break;
 
             case FOWShadowType.FOWSHADOW_TYPE_SDF:
-                m_FOWShadow                                    = new FOWShadowSDF(m_Data);
+                m_FOWShadow = new FOWShadowSDF(m_Data);
                 ((FOWShadowSDF) m_FOWShadow).m_TextureSavePath = m_TextureSavePath;
                 ((FOWShadowSDF) m_FOWShadow).m_PregenerateMode = m_PregenerateMode;
                 break;
@@ -208,8 +210,9 @@ public class FOWEffect : MonoBehaviour
         {
         case FOWShadowType.FOWSHADOW_TYPE_DOTA:
             var shadowDOTA = (FOWShadowDota) m_FOWShadow;
-            shadowDOTA.m_BlurOffset     = m_BlurOffset;
-            shadowDOTA.m_BlurInteration = m_BlurInteration;
+            shadowDOTA.m_BlurOffset          = m_BlurOffset;
+            shadowDOTA.m_BlurInteration      = m_BlurInteration;
+            shadowDOTA.m_BlurResolutionScale = m_BlurResolutionScale;
             break;
 
         case FOWShadowType.FOWSHADOW_TYPE_SDF:
@@ -221,7 +224,6 @@ public class FOWEffect : MonoBehaviour
             shadowSDF.m_Luminance           = m_Luminance;
             shadowSDF.m_StepScale           = m_StepScale;
             shadowSDF.m_StepMinValue        = m_StepMinValue;
-            shadowSDF.m_Test                = m_Test;
             break;
         }
 
@@ -255,7 +257,6 @@ public class FOWEffect : MonoBehaviour
         m_EffectMaterial.SetMatrix("_InvVP", (m_Camera.projectionMatrix * m_Camera.worldToCameraMatrix).inverse);
         m_EffectMaterial.SetMatrix("_FOWWorldToLocal", m_Data.localToWorld.inverse);
         m_EffectMaterial.SetVector("_PositionWS", m_Data.m_PositionWS);
-        m_EffectMaterial.SetFloat("_FogValue", m_FogValue);
 
         Graphics.Blit(null, dst, m_EffectMaterial);
     }
@@ -315,10 +316,10 @@ public class FOWEffect : MonoBehaviour
         {
             // Ray visualization
             RaycastHit hit;
-            Ray        ray = new Ray(Vector3.zero, m_Data.LocalToWorldDir(Vector3.down));
+            Ray ray = new Ray(Vector3.zero, m_Data.LocalToWorldDir(Vector3.down));
 
             LayerMask stageCollider = LayerMask.NameToLayer("StageCollider");
-            int       layerMask     = 1 << stageCollider.value;
+            int layerMask = 1 << stageCollider.value;
 
             // LayerMask stageCollider = LayerMask.NameToLayer("StageCollider");
             // stageCollider = ~stageCollider;
@@ -347,7 +348,7 @@ public class FOWEffect : MonoBehaviour
         {
             Gizmos.color = Color.blue;
             Gizmos.DrawSphere(positionWS, m_OriginRadius);
-            Gizmos.DrawSphere(positionWS + m_Data.m_XSize * m_Data.LocalToWorldDir(Vector3.right) + m_Data.m_ZSize * m_Data.LocalToWorldDir(Vector3.forward), m_OriginRadius);
+            // Gizmos.DrawSphere(positionWS + m_Data.m_XSize * m_Data.LocalToWorldDir(Vector3.right) + m_Data.m_ZSize * m_Data.LocalToWorldDir(Vector3.forward), m_OriginRadius);
         }
     }
 

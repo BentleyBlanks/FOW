@@ -120,29 +120,26 @@ public class FOWMaskData
     private                  List<int>         m_ArrivedPixels;
     [HideInInspector] public float             m_RefreshTimeSpeed = 4.0f;
     [HideInInspector] public float             m_MixTimeSpeed     = 3.0f;
-    [HideInInspector] public float             m_FadeTimeLength   = 0.7f;
+    [HideInInspector] public float             m_FadeTimeLength   = 1.0f;
 
-    public void Init(FOWData data)
+    public void Init(FOWData data = null)
     {
-        m_FOWData = data;
+        if(data != null)
+            m_FOWData = data;
 
         int length = texWidth * texHeight;
 
         // regenerate when attributes changed
         if (m_MaskCache == null || m_MaskCache.Length != length)
-        {
-            m_MaskCache = null;
             m_MaskCache = new byte[length];
-        }
 
         if (m_ColorBuffer == null || m_ColorBuffer.Length != length)
-        {
-            m_ColorBuffer = null;
-            m_ColorBuffer = new Color[texWidth * texHeight];
-        }
+            m_ColorBuffer = new Color[length];
 
         // regenerate the texture if necessary
-        if (m_MaskTexture == null || m_MaskTexture.width != texWidth || m_MaskTexture.height != texHeight)
+        if (m_MaskTexture == null || 
+            m_MaskTexture.width != texWidth || 
+            m_MaskTexture.height != texHeight)
         {
             if (m_MaskTexture != null)
             {
@@ -150,7 +147,7 @@ public class FOWMaskData
                 m_MaskTexture = null;
             }
 
-            m_MaskTexture            = new Texture2D(texWidth, texHeight, TextureFormat.RGB24, false);
+            m_MaskTexture            = new Texture2D(texWidth, texHeight, TextureFormat.ARGB32, false);
             m_MaskTexture.wrapMode   = TextureWrapMode.Clamp;
             m_MaskTexture.filterMode = FilterMode.Bilinear;
         }
@@ -164,6 +161,8 @@ public class FOWMaskData
 
     public void DeInit()
     {
+        Init(m_FOWData);
+        
         if (m_MaskTexture != null)
         {
             Object.DestroyImmediate(m_MaskTexture);
@@ -189,6 +188,8 @@ public class FOWMaskData
 
     public void Update()
     {
+        Init();
+        
         if (m_MixTime >= m_FadeTimeLength)
         {
             if (m_RefreshTime >= m_FadeTimeLength)
@@ -196,8 +197,8 @@ public class FOWMaskData
                 m_RefreshTime = 0.0f;
                 if (UpdateMaskTexture())
                 {
-                    m_MixValue                                = 0;
-                    m_MixTime                                 = 0;
+                    m_MixValue = 0;
+                    m_MixTime  = 0;
                     FOWEffect.instance.m_IsPlayerDatasUpdated = false;
                     // m_IsFieldDatasUpdated = false;
                     //m_Renderer.SetFogTexture(m_Map.GetFOWTexture());
@@ -210,8 +211,8 @@ public class FOWMaskData
         }
         else
         {
-            m_MixTime  += Time.deltaTime * m_MixTimeSpeed;
-            m_MixValue =  m_MixTime / m_FadeTimeLength;
+            m_MixTime += Time.deltaTime * m_MixTimeSpeed;
+            m_MixValue = m_MixTime / m_FadeTimeLength;
         }
     }
 
@@ -248,6 +249,7 @@ public class FOWMaskData
                     origin.r = Mathf.Clamp01(origin.r + origin.g);
                     origin.b = origin.g;
                     origin.g = isVisible ? 1 : 0;
+                    origin.a = 1.0f;
 
                     m_ColorBuffer[j * texWidth + i] = origin;
                     m_MaskCache[j * texWidth + i]   = 0;

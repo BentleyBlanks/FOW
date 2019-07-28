@@ -17,8 +17,11 @@
       <Path>.vs</Path>
       <Path>Library</Path>
       <Path>Logs</Path>
+      <Path>Note Resources</Path>
       <Path>SublimeProject</Path>
       <Path>Temp</Path>
+      <Path>hooks</Path>
+      <Path>lfs</Path>
       <Path>obj</Path>
     </explicitExcludes>
   </component>

@@ -20,34 +20,33 @@
 
 			struct vertInput
 			{
-				fixed4 vertex : POSITION;
-				fixed2 texCoord : TEXCOORD0;
+				float4 vertex : POSITION;
+				float2 texCoord : TEXCOORD0;
 			};
 
 			struct fragInput
 			{
-				fixed2 texCoord : TEXCOORD0;
-				fixed4 positionCS : SV_POSITION;
+				float2 texCoord : TEXCOORD0;
+				float4 positionCS : SV_POSITION;
 			};
 
-			// sampler2D _CameraColorBuffer;
-			// sampler2D _CustomDepthTexture;
-			// sampler2D _FOWTexture;
+			sampler2D _CameraColorBuffer;
+			sampler2D _CameraDepthTexture;
+			sampler2D _FOWTexture;
 			
-			Texture2D _CameraDepthTexture;
-			Texture2D _CameraColorBuffer;
-			Texture2D _FOWTexture;
-			SamplerState _FOW_Trilinear_Clamp_Sampler;
+			// Texture2D _CameraDepthTexture;
+			// Texture2D _CameraColorBuffer;
+			// Texture2D _FOWTexture;
+			// SamplerState _FOW_Trilinear_Clamp_Sampler;
 
-			fixed _FogValue;
-			fixed2 _InvSize;
-			fixed4 _PositionWS;
+			float2 _InvSize;
+			float4 _PositionWS;
 			float4x4 _InvVP;
 			float4x4 _FOWWorldToLocal;
 
 			// shading
-			half _LerpValue;
-			half4 _FogColor;
+			float _LerpValue;
+			float4 _FogColor;
 			
 			fragInput vert (vertInput input)
 			{
@@ -59,48 +58,44 @@
 			    return output;
 			}
 
-           fixed3 ComputeWorldSpacePosition(fixed2 positionNDC, fixed deviceDepth)
+           float3 ComputeWorldSpacePosition(float2 positionNDC, float deviceDepth)
            {
-               fixed4 positionCS = fixed4(fixed3(positionNDC, deviceDepth) * 2.0f - 1.0f, 1.0f);
-               fixed4 positionVS = mul(_InvVP, positionCS);
+               float4 positionCS = float4(float3(positionNDC, deviceDepth) * 2.0f - 1.0f, 1.0f);
+               float4 positionVS = mul(_InvVP, positionCS);
 
-               fixed3 positionWS = positionVS.xyz / positionVS.w;
+               float3 positionWS = positionVS.xyz / positionVS.w;
                return positionWS;
            }
 
-			fixed4 frag (fragInput input) : SV_Target
+			float4 frag (fragInput input) : SV_Target
 			{
-				// fixed depth = SAMPLE_DEPTH_TEXTURE(_CustomDepthTexture, input.texCoord);
-				fixed depth = _CameraDepthTexture.Sample(_FOW_Trilinear_Clamp_Sampler, input.texCoord);
+				float depth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, input.texCoord);
 			    
 			#if defined(UNITY_REVERSED_Z)
 				depth = 1.0f - depth;
 			#endif
-				// return fixed4(depth.xxx, 1.0f);
 
 				// recreate world space position 
-			    fixed3 positionWS = ComputeWorldSpacePosition(input.texCoord, depth);
-			    fixed4 positionLS = mul(_FOWWorldToLocal, fixed4(positionWS, 1.0f));
+			    float3 positionWS = ComputeWorldSpacePosition(input.texCoord, depth);
+			    float4 positionLS = mul(_FOWWorldToLocal, float4(positionWS, 1.0f));
 			    positionLS /= positionLS.w;
 
 			    // sample texture in mask's local space 
-			    // fixed3 fogValue = tex2D(_FOWTexture, positionLS.xz * fixed2(_InvSize));
-			    // fixed3 bgColor  = tex2D(_CameraColorBuffer, input.texCoord);
-			    fixed3 fogValue = _FOWTexture.Sample(_FOW_Trilinear_Clamp_Sampler, positionLS.xz * fixed2(_InvSize));
-			    fixed3 bgColor  = _CameraColorBuffer.Sample(_FOW_Trilinear_Clamp_Sampler, input.texCoord);
+			    float3 fogValue = tex2D(_FOWTexture, positionLS.xz * float2(_InvSize));
+			    float3 bgColor  = tex2D(_CameraColorBuffer, input.texCoord);
 
-			    fixed3 color;
+			    float3 color;
 	    	#ifdef FOWSHADOWTYPE_SDF
-		    	color = bgColor * max(fogValue.r, _FogValue);
+		    	color = bgColor * max(fogValue.r, _FogColor.r);
 		    #else
-				color = lerp(_FogColor.rgb, fixed3(1, 1, 1), fogValue.r * _FogColor.a);
+				color = lerp(_FogColor.rgb, float3(1, 1, 1), fogValue.r * _FogColor.a);
 
 			    // Mixed between last and current frame fog texture
-				fixed visual = lerp(fogValue.b, fogValue.g, _LerpValue);
-				color = lerp(color, fixed3(1, 1, 1), visual);
+				float visual = lerp(fogValue.b, fogValue.g, _LerpValue);
+				color = lerp(color, float3(1, 1, 1), visual);
 				color *= bgColor;
 		    #endif
-			    return fixed4(color, 1.0f);
+			    return float4(color, 1.0f);
 			}
 			ENDCG
 		}

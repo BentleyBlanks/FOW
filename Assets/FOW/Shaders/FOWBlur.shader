@@ -13,6 +13,7 @@
 			#include "UnityCG.cginc"
 
 			sampler2D _FOWTexture;
+			float2 _TextureTexelSize;
 			float _Offset;
 
 			struct vertInput
@@ -39,14 +40,14 @@
 
 			fixed4 frag (fragInput input) : SV_Target
 			{
-				return fixed4(tex2D(_FOWTexture, input.texCoord).rgb, 1.0f);
+				// return fixed4(tex2D(_FOWTexture, input.texCoord).rgb, 1.0f);
 				
-				float4 uv01 = input.texCoord.xyxy + _Offset * float4(0, 1, 0, -1);
-				float4 uv10 = input.texCoord.xyxy + _Offset * float4(1, 0, -1, 0);
-				float4 uv23 = input.texCoord.xyxy + _Offset * float4(0, 1, 0, -1) * 2.0;
-				float4 uv32 = input.texCoord.xyxy + _Offset * float4(1, 0, -1, 0) * 2.0;
-				float4 uv45 = input.texCoord.xyxy + _Offset * float4(0, 1, 0, -1) * 3.0;
-				float4 uv54 = input.texCoord.xyxy + _Offset * float4(1, 0, -1, 0) * 3.0;
+				float4 uv01 = input.texCoord.xyxy + _Offset * float4(0, 1, 0, -1) * _TextureTexelSize.xyxy;
+				float4 uv10 = input.texCoord.xyxy + _Offset * float4(1, 0, -1, 0) * _TextureTexelSize.xyxy;
+				float4 uv23 = input.texCoord.xyxy + _Offset * float4(0, 1, 0, -1) * _TextureTexelSize.xyxy * 2.0;
+				float4 uv32 = input.texCoord.xyxy + _Offset * float4(1, 0, -1, 0) * _TextureTexelSize.xyxy * 2.0;
+				float4 uv45 = input.texCoord.xyxy + _Offset * float4(0, 1, 0, -1) * _TextureTexelSize.xyxy * 3.0;
+				float4 uv54 = input.texCoord.xyxy + _Offset * float4(1, 0, -1, 0) * _TextureTexelSize.xyxy * 3.0;
 
 				fixed4 c = fixed4(0, 0, 0, 0);
 

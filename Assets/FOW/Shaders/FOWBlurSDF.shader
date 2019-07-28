@@ -21,14 +21,14 @@
 
 			struct vertInput
 			{
-				fixed4 vertex : POSITION;
-				fixed2 texCoord : TEXCOORD0;
+				float4 vertex : POSITION;
+				float2 texCoord : TEXCOORD0;
 			};
 
 			struct fragInput
 			{
-				fixed2 texCoord : TEXCOORD0;
-				fixed4 positionCS : SV_POSITION;
+				float2 texCoord : TEXCOORD0;
+				float4 positionCS : SV_POSITION;
 			};
 
 			fragInput vert(vertInput input)
@@ -41,7 +41,7 @@
 			    return output;
 			}
 
-			fixed4 frag (fragInput input) : SV_Target
+			float4 frag (fragInput input) : SV_Target
 			{
 				float2 position = input.texCoord;
 				float distance = length(_PlayerPos - position) * _BlurLevel;
@@ -53,7 +53,7 @@
 				float4 uv45 = input.texCoord.xyxy + distance * float4(0, 1, 0, -1) * _TextureTexelSize.xyxy * 3.0;
 				float4 uv54 = input.texCoord.xyxy + distance * float4(1, 0, -1, 0) * _TextureTexelSize.xyxy * 3.0;
 
-				fixed4 c = fixed4(0, 0, 0, 0);
+				float4 c = float4(0, 0, 0, 0);
 
 				c += 0.4 * _FOWTexture.Sample(_FOW_Trilinear_Clamp_Sampler, input.texCoord);
 				c += 0.075 * _FOWTexture.Sample(_FOW_Trilinear_Clamp_Sampler, uv01.xy);

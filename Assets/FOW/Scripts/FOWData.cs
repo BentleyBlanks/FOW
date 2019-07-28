@@ -9,11 +9,11 @@ namespace MoleMole
     public class FOWData
     {
         [Range(-100.0f, 100.0f)] public float m_HeightRange = 1.0f;
-        [Range(0.0f, 1000.0f)]   public float m_XSize       = 120.0f;
-        [Range(0.0f, 1000.0f)]   public float m_ZSize       = 120.0f;
+        [Range(0.0f, 2048.0f)]   public float m_XSize       = 120.0f;
+        [Range(0.0f, 2048.0f)]   public float m_ZSize       = 120.0f;
 
-        [Range(0, 1000)] public int m_TexWidth  = 100;
-        [Range(0, 1000)] public int m_TexHeight = 100;
+        [Range(10, 2048)] public int m_TexWidth  = 128;
+        [Range(10, 2048)] public int m_TexHeight = 128;
         
         public Vector3 m_PositionWS = Vector3.zero;
         public Vector3 m_RotationWS = Vector3.zero;

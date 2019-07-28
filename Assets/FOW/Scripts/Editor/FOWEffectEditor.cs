@@ -21,7 +21,7 @@ public class FOWEffectEditor : Editor
         var fowShadow = m_Target.m_FOWShadow;
         if (fowShadow != null)
         {
-            switch (m_Target.m_FOWShadowType)
+            switch (fowShadow.GetFowShadowType())
             {
             case FOWShadowType.FOWSHADOW_TYPE_SDF:
                 var shadowSDF = (FOWShadowSDF) fowShadow;
@@ -45,11 +45,6 @@ public class FOWEffectEditor : Editor
                     shadowSDF.Pregenerate();
                     shadowSDF.m_TextureSavePath = backup;
                 }
-                
-                if (GUILayout.Button("Save Textures"))
-                {
-                    shadowSDF.SaveFOWTexture();
-                }
                 break;
 
             case FOWShadowType.FOWSHADOW_TYPE_DOTA:
@@ -62,7 +57,7 @@ public class FOWEffectEditor : Editor
 
                 if (shadowDota.mapDataTexture != null)
                     GUILayout.Box(shadowDota.mapDataTexture);
-            
+
                 // regenerate texture infomation
                 if (GUILayout.Button("Generate"))
                     shadowDota.Pregenerate();

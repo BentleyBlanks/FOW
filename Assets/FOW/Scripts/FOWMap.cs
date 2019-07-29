@@ -73,7 +73,7 @@ namespace MoleMole
             m_MapData.Update();
             m_MaskData.Update();
         }
-        
+
         public void UpdateMask(List<FOWPlayerData> playerDataList)
         {
             ThreadPool.QueueUserWorkItem(m_MaskCalculatorCallback, playerDataList);

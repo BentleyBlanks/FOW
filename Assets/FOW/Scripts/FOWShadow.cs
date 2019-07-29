@@ -16,7 +16,7 @@ public interface FOWShadow
     void Destroy();
 
     void Update();
-    
+
     void UpdatePlayerData(List<FOWPlayerData> playerDataList);
 
     void Pregenerate();
@@ -28,4 +28,6 @@ public interface FOWShadow
     RenderTexture RenderFOWTexture();
 
     float GetLerpValue();
+
+    FOWShadowType GetFowShadowType();
 }

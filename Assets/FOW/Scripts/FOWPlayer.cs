@@ -21,7 +21,7 @@ namespace MoleMole
     [ExecuteInEditMode]
     public class FOWPlayer : MonoBehaviour
     {
-        [Range(0.0f, 3.0f)] public float m_Radius = 0.15f;
+        [Range(0.0f, 10.0f)] public float m_Radius = 0.15f;
         [Range(0.0f, 5.0f)] public float m_PlayerSpeed = 1.0f;
         
         private Transform     m_Transform  = null;

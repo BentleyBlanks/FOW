@@ -103,7 +103,7 @@ public class FOWMaskData
         }
     }
 
-    private float m_MixTime;
+    private float m_TimeAccumlation;
     private float m_RefreshTime;
     private float m_MixValue;
 
@@ -120,7 +120,7 @@ public class FOWMaskData
     private                  List<int>         m_ArrivedPixels;
     [HideInInspector] public float             m_RefreshTimeSpeed = 4.0f;
     [HideInInspector] public float             m_MixTimeSpeed     = 3.0f;
-    [HideInInspector] public float             m_FadeTimeLength   = 1.0f;
+    [HideInInspector] public float             m_FadeTimeLength   = 0.7f;
 
     public void Init(FOWData data = null)
     {
@@ -190,7 +190,7 @@ public class FOWMaskData
     {
         Init();
         
-        if (m_MixTime >= m_FadeTimeLength)
+        if (m_TimeAccumlation >= m_FadeTimeLength)
         {
             if (m_RefreshTime >= m_FadeTimeLength)
             {
@@ -198,7 +198,7 @@ public class FOWMaskData
                 if (UpdateMaskTexture())
                 {
                     m_MixValue = 0;
-                    m_MixTime  = 0;
+                    m_TimeAccumlation  = 0;
                     FOWEffect.instance.m_IsPlayerDatasUpdated = false;
                     // m_IsFieldDatasUpdated = false;
                     //m_Renderer.SetFogTexture(m_Map.GetFOWTexture());
@@ -211,8 +211,8 @@ public class FOWMaskData
         }
         else
         {
-            m_MixTime += Time.deltaTime * m_MixTimeSpeed;
-            m_MixValue = m_MixTime / m_FadeTimeLength;
+            m_TimeAccumlation += Time.deltaTime * m_MixTimeSpeed;
+            m_MixValue = 1.0f;// m_TimeAccumlation/* / m_FadeTimeLength*/;
         }
     }
 

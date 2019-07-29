@@ -88,16 +88,12 @@ public class FOWEffect : MonoBehaviour
         m_PlayerDataList = null;
     }
 
-    public void Update()
+    public void FixedUpdate()
     {
         Init();
-    }
-
-    public void FixedUpdate()
-    {        
+        
         m_Data.Update();
         m_FOWShadow.Update();
-        m_FOWShadow.FixedUpdate();
     }
 
     public void Init()

@@ -123,11 +123,6 @@ public class FOWShadowDota : FOWShadow
         
         m_Map.Update();
     }
-
-    public void FixedUpdate()
-    {
-        m_Map.FixedUpdate();
-    }
     
     public void UpdatePlayerData(List<FOWPlayerData> playerDataList)
     {

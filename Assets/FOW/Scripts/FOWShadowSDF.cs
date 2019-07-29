@@ -156,7 +156,6 @@ public class FOWShadowSDF : FOWShadow
     }
 
     public void Update() { }
-    public void FixedUpdate() { }
 
     public void UpdatePlayerData(List<FOWPlayerData> playerDataList)
     {

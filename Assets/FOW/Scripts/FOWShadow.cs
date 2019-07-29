@@ -17,8 +17,6 @@ public interface FOWShadow
 
     void Update();
 
-    void FixedUpdate();
-    
     void UpdatePlayerData(List<FOWPlayerData> playerDataList);
 
     void Pregenerate();

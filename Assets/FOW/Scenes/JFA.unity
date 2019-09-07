@@ -397,7 +397,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Radius: 6
-  m_PlayerSpeed: 3
+  m_PlayerSpeed: 0.05
+  m_PlayerDamp: 0.05
 --- !u!135 &601695663
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1246,8 +1247,8 @@ MonoBehaviour:
     m_HeightRange: 1.5
     m_XSize: 10
     m_ZSize: 10
-    m_TexWidth: 128
-    m_TexHeight: 128
+    m_TexWidth: 64
+    m_TexHeight: 64
     m_PositionWS: {x: -5, y: 2, z: -5}
     m_RotationWS: {x: 0, y: 0, z: 0}
   m_FOWShadowType: 0
@@ -1257,6 +1258,7 @@ MonoBehaviour:
   m_BlurLevel: 3.5
   m_BlurResolutionScale: 0.8
   m_FogValue: 0.4
+  m_LerpValue: 0
   m_TextureSavePath: 
   m_CutOff: 0.0001
   m_Luminance: 3.5
@@ -1269,4 +1271,4 @@ MonoBehaviour:
   m_VisualizeAxis: 0
   m_AxisLength: 10
   m_OriginRadius: 1
-  m_IsPlayerDatasUpdated: 1
+  m_IsPlayerDatasUpdated: 0

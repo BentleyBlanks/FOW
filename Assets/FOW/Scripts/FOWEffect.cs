@@ -6,7 +6,7 @@ using UnityEngine;
 
 // Fog of war 
 [DisallowMultipleComponent]
-[ExecuteInEditMode]
+// [ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
 public class FOWEffect : MonoBehaviour
 {
@@ -27,7 +27,7 @@ public class FOWEffect : MonoBehaviour
     [Range(0.01f, 1.0f)]  public float m_BlurResolutionScale = 0.8f;
     
     [Range(0.0f, 1.0f)] public float m_FogValue = 0.4f;
-
+    public float m_LerpValue = 0.0f;
     [HideInInspector] public string m_TextureSavePath = "";
 
     [Range(0.00001f, 0.2f)] public float m_CutOff       = 0.0001f;
@@ -69,6 +69,7 @@ public class FOWEffect : MonoBehaviour
     private List<FOWPlayerData> m_PlayerDataList = null;
     private RenderTexture m_CopyCameraBuffer = null;
     private bool m_IsInited = false;
+    private bool m_IsGenerateedFOWTexture = false;
     private static FOWEffect m_Instance;
     #endregion
     
@@ -87,21 +88,31 @@ public class FOWEffect : MonoBehaviour
 
         m_PlayerDataList = null;
     }
-
+    
     public void FixedUpdate()
     {
         Init();
+        StartCoroutine(DeferGenerateFOWTexture());
         
         m_Data.Update();
         m_FOWShadow.Update();
     }
 
+    // Generate FOW Texture after physics system is ready(wait a frame).
+    public IEnumerator DeferGenerateFOWTexture()
+    {
+        yield return 0;
+        
+        if (Application.isPlaying && !m_IsGenerateedFOWTexture)
+            GenerateFOWTexture();
+    }
+    
     public void Init()
     {
-        if (m_FOWShadowType == FOWShadowType.FOWSHADOW_TYPE_DOTA)
+        if (m_FOWShadowType == FOWShadowType.FOWSHADOW_TYPE_DOTA && m_PregenerateMode == FOWSDFPregenerateMode.GPU)
         {
             m_PregenerateMode = FOWSDFPregenerateMode.CPU;
-            Debug.Log("FOW Grid Mode GPU not supported");
+            Debug.LogWarning("FOW Grid Mode GPU not supported");
         }
     
         // Camera need to write depth into depthTexture
@@ -131,19 +142,7 @@ public class FOWEffect : MonoBehaviour
         }
 
         if (m_EffectMaterial == null)
-        {
             m_EffectMaterial = new Material(Shader.Find("Hidden/FOWEffect"));
-            switch (m_FOWShadowType)
-            {
-            case FOWShadowType.FOWSHADOW_TYPE_DOTA:
-                m_EffectMaterial.DisableKeyword("FOWSHADOWTYPE_SDF");
-                break;
-
-            case FOWShadowType.FOWSHADOW_TYPE_SDF:
-                m_EffectMaterial.EnableKeyword("FOWSHADOWTYPE_SDF");
-                break;
-            }
-        }
 
         m_IsInited = true;
     }
@@ -152,6 +151,7 @@ public class FOWEffect : MonoBehaviour
     {
         if (!IsInited()) return;
         m_FOWShadow.Pregenerate();
+        m_IsGenerateedFOWTexture = true;
     }
 
     public void SaveFOWTexture()
@@ -244,8 +244,22 @@ public class FOWEffect : MonoBehaviour
             m_CopyCameraBuffer.Create();
         }
 
+        m_LerpValue = m_FOWShadow.GetLerpValue();
+
         Graphics.CopyTexture(cameraBuffer, m_CopyCameraBuffer);
-        m_EffectMaterial.SetFloat("_LerpValue", m_FOWShadow.GetLerpValue());
+        
+        switch (m_FOWShadowType)
+        {
+        case FOWShadowType.FOWSHADOW_TYPE_DOTA:
+            m_EffectMaterial.DisableKeyword("FOWSHADOWTYPE_SDF");
+            break;
+
+        case FOWShadowType.FOWSHADOW_TYPE_SDF:
+            m_EffectMaterial.EnableKeyword("FOWSHADOWTYPE_SDF");
+            break;
+        }
+        
+        // m_EffectMaterial.SetFloat("_LerpValue", m_FOWShadow.GetLerpValue());
         m_EffectMaterial.SetColor("_FogColor", m_FogColor);
         m_EffectMaterial.SetVector("_InvSize", m_Data.invSize);
         m_EffectMaterial.SetTexture("_FOWTexture", fowTexture);
@@ -257,13 +271,20 @@ public class FOWEffect : MonoBehaviour
         Graphics.Blit(null, dst, m_EffectMaterial);
     }
 
+    public void SetLerpValue(float lerpValue)
+    {
+        m_LerpValue = lerpValue;
+        m_EffectMaterial.SetFloat("_LerpValue", lerpValue);
+    }
+
     #region Visualization
 
     public void OnDrawGizmosSelected()
     {
         if (!enabled) return;
         if (m_Data == null) return;
-
+        m_Data.Update();
+        
         var xSize       = m_Data.m_XSize;
         var zSize       = m_Data.m_ZSize;
         var texWidth    = m_Data.m_TexWidth;

@@ -22,11 +22,14 @@ namespace MoleMole
     public class FOWPlayer : MonoBehaviour
     {
         [Range(0.0f, 10.0f)] public float m_Radius = 0.15f;
-        [Range(0.0f, 5.0f)] public float m_PlayerSpeed = 1.0f;
+        [Range(0.0f, 5.0f)] public float m_PlayerSpeed = 0.15f;
+        [Range(0.0f, 5.0f)] public float m_PlayerDamp = 0.05f;
         
         private Transform     m_Transform  = null;
         private FOWPlayerData m_PlayerData = null;
-
+        private Vector3 m_Acceleration = Vector3.zero;
+        private Vector3 m_Damp = Vector3.zero;
+    
         void Awake()
         {
             Init();
@@ -67,13 +70,13 @@ namespace MoleMole
         {
             Vector3 position = m_Transform.position;
             
-            if (Input.GetKeyDown (KeyCode.W))
+            if (Input.GetKey (KeyCode.W))
                 position.z += m_PlayerSpeed;
-            if (Input.GetKeyDown (KeyCode.S))
+            if (Input.GetKey (KeyCode.S))
                 position.z -= m_PlayerSpeed;
-            if (Input.GetKeyDown (KeyCode.A))
+            if (Input.GetKey (KeyCode.A))
                 position.x -= m_PlayerSpeed;
-            if (Input.GetKeyDown (KeyCode.D))
+            if (Input.GetKey (KeyCode.D))
                 position.x += m_PlayerSpeed;
             
             m_Transform.position = position;

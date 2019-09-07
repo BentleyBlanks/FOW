@@ -36,13 +36,13 @@ public class FOWEffectEditor : Editor
                             
                 // regenerate texture infomation
                 if (GUILayout.Button("Generate Textures"))
-                    shadowSDF.Pregenerate();
+                    m_Target.GenerateFOWTexture();
                 
                 if (GUILayout.Button("Force Generate Textures"))
                 {
                     var backup = shadowSDF.m_TextureSavePath;
                     shadowSDF.m_TextureSavePath = "";
-                    shadowSDF.Pregenerate();
+                    m_Target.GenerateFOWTexture();
                     shadowSDF.m_TextureSavePath = backup;
                 }
 

@@ -116,11 +116,13 @@ public class FOWMaskData
     private FOWData m_FOWData = null;
 
     // FOV Calculation
-    private                  Queue<Vector2Int> m_RootPixelQueue;
-    private                  List<int>         m_ArrivedPixels;
+    private Queue<Vector2Int> m_RootPixelQueue;
+    private List<int>         m_ArrivedPixels;
+    private object            m_Lock;
+    
     [HideInInspector] public float             m_RefreshTimeSpeed = 4.0f;
     [HideInInspector] public float             m_MixTimeSpeed     = 3.0f;
-    [HideInInspector] public float             m_FadeTimeLength   = 0.7f;
+    [HideInInspector] public float             m_FadeTimeLength   = 1.0f;
 
     public void Init(FOWData data = null)
     {
@@ -157,6 +159,9 @@ public class FOWMaskData
 
         if (m_ArrivedPixels == null)
             m_ArrivedPixels = new List<int>();
+        
+        if(m_Lock == null)
+            m_Lock = new object();
     }
 
     public void DeInit()
@@ -189,45 +194,46 @@ public class FOWMaskData
     public void Update()
     {
         Init();
-        
-        if (m_TimeAccumlation >= m_FadeTimeLength)
+
+        if (m_MixValue >= 1.0f)
         {
-            if (m_RefreshTime >= m_FadeTimeLength)
+            if (m_RefreshTime >= 1.0f)
             {
                 m_RefreshTime = 0.0f;
                 if (UpdateMaskTexture())
                 {
                     m_MixValue = 0;
-                    m_TimeAccumlation  = 0;
+                    FOWEffect.instance.SetLerpValue(0);
                     FOWEffect.instance.m_IsPlayerDatasUpdated = false;
-                    // m_IsFieldDatasUpdated = false;
-                    //m_Renderer.SetFogTexture(m_Map.GetFOWTexture());
                 }
             }
             else
             {
-                m_RefreshTime += Time.deltaTime * m_RefreshTimeSpeed;
+                m_RefreshTime += Time.deltaTime* m_RefreshTimeSpeed;
             }
         }
         else
         {
-            m_TimeAccumlation += Time.deltaTime * m_MixTimeSpeed;
-            m_MixValue = 1.0f;// m_TimeAccumlation/* / m_FadeTimeLength*/;
+            m_MixValue += Time.deltaTime* m_MixTimeSpeed;
+            FOWEffect.instance.SetLerpValue(m_MixValue);
         }
     }
 
     private bool UpdateMaskTexture()
     {
-        if (m_UpdateMark == UpdateMark.None) return false;
-        if (m_UpdateMark == UpdateMark.EndUpdate) return true;
+        lock (m_Lock)
+        {
+            if (m_UpdateMark == UpdateMark.None) return false;
+            if (m_UpdateMark == UpdateMark.EndUpdate) return true;
 
-        // Update MaskTexture from ColorBuffer
-        m_MaskTexture.SetPixels(m_ColorBuffer);
-        m_MaskTexture.Apply();
+            // Update MaskTexture from ColorBuffer
+            m_MaskTexture.SetPixels(m_ColorBuffer);
+            m_MaskTexture.Apply();
 
-        // Mark as clean
-        m_UpdateMark = UpdateMark.None;
-        return true;
+            // Mark as clean
+            m_UpdateMark = UpdateMark.None;
+            return true;
+        }
     }
 
     public void UpdateColorBuffer()

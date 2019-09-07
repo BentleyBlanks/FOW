@@ -8,7 +8,7 @@ Some possible implementations of 'Fog of War'. Both of them based on screen spac
 
 SDF's resolution recommend 128x128 or 256x256, and Grid is recommened 32x32 or 64x64
 
-Implementation detail about these could be find [here]([https://github.com/BentleyBlanks/Notes/blob/master/notes/Renderer/Screen%20Space%20Fog%20of%20War.md](https://github.com/BentleyBlanks/Notes/blob/master/notes/Renderer/Screen Space Fog of War.md))
+Implementation detail about these could be find [here](https://github.com/BentleyBlanks/Notes/blob/master/notes/Renderer/Screen%20Space%20Fog%20of%20War.md)
 
 
 

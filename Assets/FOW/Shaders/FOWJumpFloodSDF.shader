@@ -99,14 +99,14 @@
 				float minDistance = 99999.0;
 				float2 minCoord = float2(0.0f, 0.0f);
 				float2 minColor = float2(0.0f, 1.0f);
-				// float stepwidth = floor(exp2(_Power - _Level) + 0.5);
-				float stepwidth = _Power - _Level + 1;
+				float stepwidth = floor(exp2(_Power - _Level) + 0.5);
+				// float stepwidth = _Power - _Level + 1;
 
 			    for (int y = -1; y <= 1; ++y) 
 			    {
         			for (int x = -1; x <= 1; ++x) 
         			{
-						float2 uv = input.texCoord + float2(x,y) * _TexelSize * stepwidth;
+						float2 uv = input.texCoord + float2(x, y) * _TexelSize * stepwidth;
 
 						// Sample semi-finished sdf texture
 						float4 value     = _SDFTexture.Sample(_SDFTexture_Trilinear_Clamp_Sampler, uv);
@@ -171,7 +171,7 @@
 			{
 				float2 uv = input.texCoord;
 				float4 value = _SDFFinalTexture.Sample(_Texture_Trilinear_Clamp_Sampler, uv);
-				float distance = min(length(uv - value.zw), 1.0f);
+				float distance = length(uv - value.zw);
 				return float4(distance.xxx, 1.0f);
 			}
 

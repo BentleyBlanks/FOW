@@ -29,7 +29,7 @@ public class FOWShadowSDF : FOWShadow
     public float m_StepMinValue = 0.0001f;
 
     private Color[]   m_SDFBuffer        = null;
-    private Texture2D m_SDFTexture       = null;
+    private RenderTexture m_SDFTexture       = null;
     private Vector2   m_TextureSizeScale = Vector2.one;
     private Vector2   m_TextureTexelSize = Vector2.one;
     
@@ -72,7 +72,7 @@ public class FOWShadowSDF : FOWShadow
         }
     }
 
-    public Texture2D sdfTexture
+    public RenderTexture sdfTexture
     {
         get
         {
@@ -126,7 +126,7 @@ public class FOWShadowSDF : FOWShadow
 
         if (m_SDFTexture == null)
         {
-            m_SDFTexture            = new Texture2D(texWidth, texHeight, TextureFormat.ARGB32, false);
+            m_SDFTexture            = new RenderTexture(texWidth, texHeight, 0, RenderTextureFormat.ARGBFloat);
             m_SDFTexture.wrapMode   = TextureWrapMode.Clamp;
             m_SDFTexture.filterMode = FilterMode.Bilinear;
         }
@@ -215,8 +215,8 @@ public class FOWShadowSDF : FOWShadow
         //--! Ref: https://www.comp.nus.edu.sg/~tants/jfa/i3d06.pdf Jump Flood Algorithm
         //--! Ref: https://www.shadertoy.com/view/Mdy3DK
         // SDF Texture Initialization
-        RenderTexture rt0 = RenderTexture.GetTemporary(texWidth, texHeight, 0, RenderTextureFormat.ARGB32);
-        RenderTexture rt1 = RenderTexture.GetTemporary(texWidth, texHeight, 0, RenderTextureFormat.ARGB32);
+        RenderTexture rt0 = RenderTexture.GetTemporary(texWidth, texHeight, 0, RenderTextureFormat.ARGBFloat);
+        RenderTexture rt1 = RenderTexture.GetTemporary(texWidth, texHeight, 0, RenderTextureFormat.ARGBFloat);
         m_SDFMaterial.SetTexture("_MapDataTexture", m_MapData.mapDataTexture);
         Graphics.Blit(null, rt0, m_SDFMaterial, 0);
         
@@ -248,7 +248,7 @@ public class FOWShadowSDF : FOWShadow
         else
             result = pingpong[1];
         
-        RenderTexture temp = RenderTexture.GetTemporary(texWidth, texHeight, 0, RenderTextureFormat.ARGB32);
+        RenderTexture temp = RenderTexture.GetTemporary(texWidth, texHeight, 0, RenderTextureFormat.ARGBFloat);
         m_SDFMaterial.SetTexture("_SDFFinalTexture", result);
         Graphics.Blit(null, temp, m_SDFMaterial, 2);
         Graphics.CopyTexture(temp, m_SDFTexture);
@@ -259,102 +259,103 @@ public class FOWShadowSDF : FOWShadow
     
     public void PregenerateCPU()
     {
-        if (m_TextureSavePath != "")
-        {
-            // Regenerate a sdf texture if read from disk failed
-            if (ReadFOWTexture())
-                return;
+        // if (m_TextureSavePath != "")
+        // {
+        //     // Regenerate a sdf texture if read from disk failed
+        //     if (ReadFOWTexture())
+        //         return;
             
-            Debug.Log("Read sdf texture from disk failed");
-        }
+        //     Debug.Log("Read sdf texture from disk failed");
+        // }
 
-        // Generate a map Texture
-        m_MapData.GenerateMapData();
+        // // Generate a map Texture
+        // m_MapData.GenerateMapData();
 
-        // Generate a sdf Texture
-        var obstacleBuffer = m_MapData.obstacleBuffer;
-        var invWidth       = 1.0f / texWidth;
-        var invHeight      = 1.0f / texHeight;
-        // Using map texture to calculate a sdf texture
-        for (int j = 0; j < texHeight; j++)
-        {
-            for (int i = 0; i < texWidth; i++)
-            {
-                // obstacle already
-                if (obstacleBuffer.Exists(x => x.x == i && x.y == j))
-                {
-                    m_SDFBuffer[j * texWidth + i] = Color.black;
-                    continue;
-                }
+        // // Generate a sdf Texture
+        // var obstacleBuffer = m_MapData.obstacleBuffer;
+        // var invWidth       = 1.0f / texWidth;
+        // var invHeight      = 1.0f / texHeight;
+        // // Using map texture to calculate a sdf texture
+        // for (int j = 0; j < texHeight; j++)
+        // {
+        //     for (int i = 0; i < texWidth; i++)
+        //     {
+        //         // obstacle already
+        //         if (obstacleBuffer.Exists(x => x.x == i && x.y == j))
+        //         {
+        //             m_SDFBuffer[j * texWidth + i] = Color.black;
+        //             continue;
+        //         }
 
-                // loop all obstacle pixel
-                var minDistance         = float.MaxValue;
-                var position            = new Vector2(i * invWidth, j * invHeight);
-                var minDistancePosition = Vector2.zero;
-                for (int count = 0; count < obstacleBuffer.Count; count++)
-                {
-                    float distance = (obstacleBuffer[count] - position).magnitude;
-                    if (distance < minDistance)
-                    {
-                        minDistancePosition = obstacleBuffer[count];
-                        minDistance         = distance;
-                    }
-                }
+        //         // loop all obstacle pixel
+        //         var minDistance         = float.MaxValue;
+        //         var position            = new Vector2(i * invWidth, j * invHeight);
+        //         var minDistancePosition = Vector2.zero;
+        //         for (int count = 0; count < obstacleBuffer.Count; count++)
+        //         {
+        //             float distance = (obstacleBuffer[count] - position).magnitude;
+        //             if (distance < minDistance)
+        //             {
+        //                 minDistancePosition = obstacleBuffer[count];
+        //                 minDistance         = distance;
+        //             }
+        //         }
 
-                m_SDFBuffer[j * texWidth + i].r = minDistance;
-                m_SDFBuffer[j * texWidth + i].g = 0.0f;
-                m_SDFBuffer[j * texWidth + i].b = 0.0f;
-                m_SDFBuffer[j * texWidth + i].a = 1.0f;
-            }
-        }
+        //         m_SDFBuffer[j * texWidth + i].r = minDistance;
+        //         m_SDFBuffer[j * texWidth + i].g = 0.0f;
+        //         m_SDFBuffer[j * texWidth + i].b = 0.0f;
+        //         m_SDFBuffer[j * texWidth + i].a = 1.0f;
+        //     }
+        // }
         
-        m_SDFTexture.SetPixels(m_SDFBuffer);
-        m_SDFTexture.Apply();
+        // m_SDFTexture.SetPixels(m_SDFBuffer);
+        // m_SDFTexture.Apply();
     }
 
     public bool ReadFOWTexture()
     {
-        byte[] bytes = null;
+        // byte[] bytes = null;
 
-        if (File.Exists(m_TextureSavePath))
-        {
-            bytes = System.IO.File.ReadAllBytes(m_TextureSavePath);
+        // if (File.Exists(m_TextureSavePath))
+        // {
+        //     bytes = System.IO.File.ReadAllBytes(m_TextureSavePath);
             
-            if(m_SDFTexture == null)
-                m_SDFTexture = new Texture2D(1, 1);
+        //     if(m_SDFTexture == null)
+        //         m_SDFTexture = new RenderTexture(1, 1);
             
-            // this will auto-resize the texture dimensions.
-            m_SDFTexture.LoadImage(bytes);
+        //     // this will auto-resize the texture dimensions.
+        //     m_SDFTexture.LoadImage(bytes);
 
-            if (m_SDFTexture.width != texWidth || m_SDFTexture.height != texHeight)
-            {
-                Debug.Log("File: " + m_TextureSavePath + "have different size with given data");
-                m_SDFTexture.Resize(texWidth, texHeight);
-                return false;
-            }
-            return true;
-        }
-        else
-        {
-            Debug.Log("File path didn't existed");
-            return false;
-        }
+        //     if (m_SDFTexture.width != texWidth || m_SDFTexture.height != texHeight)
+        //     {
+        //         Debug.Log("File: " + m_TextureSavePath + "have different size with given data");
+        //         m_SDFTexture.Resize(texWidth, texHeight);
+        //         return false;
+        //     }
+        //     return true;
+        // }
+        // else
+        // {
+        //     Debug.Log("File path didn't existed");
+        //     return false;
+        // }
+        return false;
     }
 
     public bool SaveFOWTexture()
     {
-        if (m_TextureSavePath != "")
-        {
-            System.IO.File.WriteAllBytes(m_TextureSavePath, m_MapData.mapDataTexture.EncodeToPNG());
-            System.IO.File.WriteAllBytes(m_TextureSavePath, m_SDFTexture.EncodeToPNG());
+        // if (m_TextureSavePath != "")
+        // {
+        //     System.IO.File.WriteAllBytes(m_TextureSavePath, m_MapData.mapDataTexture.EncodeToPNG());
+        //     System.IO.File.WriteAllBytes(m_TextureSavePath, m_SDFTexture.EncodeToPNG());
             
-            Texture2D fowTexture = new Texture2D(texWidth, texHeight, TextureFormat.ARGB32, false);
-            RenderTexture.active = m_Fowtexture;
-            fowTexture.ReadPixels(new Rect(0, 0, m_Fowtexture.width, m_Fowtexture.height), 0, 0);
-            fowTexture.Apply();
-            System.IO.File.WriteAllBytes(m_TextureSavePath, fowTexture.EncodeToPNG());
-            return true;
-        }
+        //     Texture2D fowTexture = new Texture2D(texWidth, texHeight, TextureFormat.ARGB32, false);
+        //     RenderTexture.active = m_Fowtexture;
+        //     fowTexture.ReadPixels(new Rect(0, 0, m_Fowtexture.width, m_Fowtexture.height), 0, 0);
+        //     fowTexture.Apply();
+        //     System.IO.File.WriteAllBytes(m_TextureSavePath, fowTexture.EncodeToPNG());
+        //     return true;
+        // }
 
         return false;
     }

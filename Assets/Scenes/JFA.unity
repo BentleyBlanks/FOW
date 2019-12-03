@@ -396,7 +396,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29e2ca69ada85804ca75a227cf2e48db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Radius: 6
+  m_Radius: 0.9
   m_PlayerSpeed: 0.05
   m_PlayerDamp: 0.05
 --- !u!135 &601695663
@@ -1247,16 +1247,16 @@ MonoBehaviour:
     m_HeightRange: 1.5
     m_XSize: 10
     m_ZSize: 10
-    m_TexWidth: 64
-    m_TexHeight: 64
+    m_TexWidth: 512
+    m_TexHeight: 512
     m_PositionWS: {x: -5, y: 2, z: -5}
     m_RotationWS: {x: 0, y: 0, z: 0}
-  m_FOWShadowType: 0
-  m_PregenerateMode: 0
-  m_BlurInteration: 3
+  m_FOWShadowType: 1
+  m_PregenerateMode: 1
+  m_BlurInteration: 2
   m_BlurOffset: 1
-  m_BlurLevel: 3.5
-  m_BlurResolutionScale: 0.8
+  m_BlurLevel: 4
+  m_BlurResolutionScale: 0.9
   m_FogValue: 0.4
   m_LerpValue: 0
   m_TextureSavePath: 
